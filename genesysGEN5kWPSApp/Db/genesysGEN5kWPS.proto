@@ -1,0 +1,71 @@
+#----------------------------------------------------------------------
+#
+#  StreamDevice protocol file for a reading/setting selected elements
+#  from a Genesys GEN 5kW Series Power Supplies
+#
+#  Author  : Jeong Han Lee
+#  email   : jeonghan.lee@gmail.com
+#  Date    : Tuesday, July 24 13:50:38 CEST 2018
+#  version : 0.0.1
+#
+    
+ReplyTimeout = 1000;
+ReadTimeout  = 300;
+
+
+sendCmd {
+    out "\$1";
+}
+
+sendVal {
+    out "\$1\$2";
+}
+
+# Any scaler value
+#  string:  getVal(ID,s) will send "ID?" and expect "%s".
+getVal {
+    out "\$1";
+    in "%\$2";
+}
+
+setVal {
+	out "\$1%\$2";
+}
+
+
+getModel {
+    out "IDN?";
+    in "LAMBDA,%39c";
+}
+
+
+
+getSTTMV {
+    out "STT?";
+    in "MV(%f),PV(%*f),MC(%*f),PC(%*f),SR(%*2X),FR(%*2X)"
+}
+
+getSTTPV {
+    in "MV(%*f),PV(%f),MC(%*f),PC(%*f),SR(%*2X),FR(%*2X)"
+}
+
+
+getSTTMC {
+    in "MV(%*f),PV(%*f),MC(%f),PC(%*f),SR(%*2X),FR(%*2X)"
+}
+
+
+getSTTPC {
+    in "MV(%*f),PV(%*f),MC(%*f),PC(%f),SR(%*2X),FR(%*2X)"
+}
+
+
+getSTTSR {
+    in "MV(%*f),PV(%*f),MC(%*f),PC(%*f),SR(%2X),FR(%*2X)"
+}
+
+
+getSTTFR {
+    in "MV(%*f),PV(%*f),MC(%*f),PC(%*f),SR(%*2X),FR(%2X)"
+}
+

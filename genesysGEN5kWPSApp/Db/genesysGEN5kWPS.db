@@ -1,0 +1,198 @@
+
+
+# Query one-time parameters (Name and Firmware)
+record(bo, "$(P)InfoUpdate-Cmd")
+{
+    field(DESC, "Update setting readbacks")
+    field(ZNAM, "Revert")
+    field(ONAM, "revert")
+    field(FLNK, "$(P)InfoUpdate:1-Fout_")
+    field(HIGH, "2")
+    field( VAL, "1")
+    field(PINI, "YES")
+}
+
+record(fanout, "$(P)InfoUpdate:1-Fout_")
+{
+    field(LNK1, "$(P)MODEL-RB")
+    field(LNK2, "$(P)SN-RB")
+    field(LNK3, "$(P)SWVersion-RB")
+    field(LNK4, "$(P)Date-RB")
+}
+
+# IDN?
+record(stringin, "$(P)MODEL-RB")
+{
+    field(DESC, "Model Name")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getModel $(PORT)")
+}
+
+# SN?
+record(stringin, "$(P)SN-RB")
+{
+    field(DESC, "Unit Serial Number")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(SN?,40c) $(PORT)")
+}
+
+# REV?
+record(stringin, "$(P)SWVersion-RB")
+{
+    field(DESC, "Software Version")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(REV?,40c) $(PORT)")
+}
+
+# DATE?
+record(stringin, "$(P)Date-RB")
+{
+    field(DESC, "Last Test Date")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(DATE?,40c) $(PORT)")
+}
+
+
+
+# Real the complete power supply  status
+record (ai, "$(P)MV-RB") 
+{
+    field(DESC, "Actual Output Voltage RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getSTTMV $(PORT)")
+    field( EGU, "V")
+    field(SCAN, "1 second")
+}
+
+record (ai, "$(P)PV-RB") 
+{
+    field(DESC, "Output Voltage Setting RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getSTTPV $(PORT)")
+    field( EGU, "V")
+    field(SCAN, "I/O Intr")
+}
+
+record (ai, "$(P)MC-RB") 
+{
+    field(DESC, "Actual Output Current RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getSTTMC $(PORT)")
+    field( EGU, "A")
+    field(SCAN, "I/O Intr")
+}
+
+record (ai, "$(P)PC-RB") 
+{
+    field(DESC, "Output Current Setting RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getSTTPC $(PORT)")
+    field( EGU, "A")
+    field(SCAN, "I/O Intr")
+}
+
+
+
+# Status Condition Register
+record (longin, "$(P)SR-rb_") 
+{
+    field(DESC, "Status Register RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getSTTSR $(PORT)")
+    field(SCAN, "I/O Intr")
+}
+
+
+record(calc, "$(P)SR-sts_")
+{
+    field(DESC, "8 Bit Status Condition Register")
+    field(SCAN, "Passive")
+    field(CALC, "(A&0x00000FF)")
+    field(INPA, "$(P)SR-rb_ CPP")
+    field(FLNK, "$(P)SR-BIT-STS")
+}
+
+record(mbbiDirect, "$(P)SR-BIT-STS")
+{
+    field(DESC, "Status Condition Register")
+    field(SCAN, "Passive")
+    field( INP, "$(P)SR-sts_.VAL")
+}
+
+record(mbbi, "$(P)SR-BIT-DESC")
+{
+    field(DESC, "8 Bit Status Condition Register Desc")
+    field(ZRST, "CV : Constant Voltage")
+    field(ONST, "CC : Constant Currrent")
+    field(TWST, "NFLT : No Fault")
+    field(THST, "FLT : Fault active")
+    field(FRST, "AST : Auto-Restart Enabled")
+    field(FVST, "FDE : Fold Enabled")
+    field(SXST, "Spare")
+    field(SVST, "LCL : Local Mode")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+}
+
+
+
+
+# Fault Condition Register
+
+record (longin, "$(P)FR-rb_") 
+{
+    field(DESC, "Fault Condition Register RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getSTTFR $(PORT)")
+    field(SCAN, "I/O Intr")
+}
+
+
+record(calc, "$(P)FR-sts_")
+{
+    field(DESC, "8 Bit Falut Condition Register")
+    field(SCAN, "Passive")
+    field(CALC, "(A&0x00000FF)")
+    field(INPA, "$(P)FR-rb_ CPP")
+    field(FLNK, "$(P)FR-BIT-STS")
+}
+
+record(mbbiDirect, "$(P)FR-BIT-STS")
+{
+    field(DESC, "Fault Condition Register")
+    field(SCAN, "Passive")
+    field( INP, "$(P)FR-sts_.VAL")
+}
+
+record(mbbi, "$(P)FR-BIT-DESC")
+{
+    field(DESC, "8 Bit Fault Condition Register Desc")
+    field(ZRST, "Spare")
+    field(ONST, "AC : AC Fail")
+    field(TWST, "OTP : Over Temperature")
+    field(THST, "FOLD : Foldback")
+    field(FRST, "OVP : Over Voltage")
+    field(FVST, "SO : Shut Off")
+    field(SXST, "OFF : Output Off")
+    field(SVST, "ENA : Enable")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+}
+
+
