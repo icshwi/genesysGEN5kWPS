@@ -199,7 +199,7 @@ record(mbbo, "$(P)RMT_SET")
 {
     field(DESC, "Set PS to local or remote mode")
     field(DTYP, "stream")
-    field( OUT, "@genesysGEN5kWPS.proto setRemoteMode($(P)RMT_SET_RB_) $(PORT)")
+    field( OUT, "@genesysGEN5kWPS.proto setRemoteMode($(P)ACK_MSG_RB) $(PORT)")
     field(ZRST, "Local")
     field(ZRVL, "0")
     field(ONST, "Remote")
@@ -266,8 +266,37 @@ record(mbbo, "$(P)RMT_RB_")
 }
 
 
-record(stringin, "$(P)RMT_SET_RB_")
+record(stringin, "$(P)ACK_MSG_RB")
 {
-    field(DESC, "RMT SET Reply")
+    field(DESC, "Acknowlege Message")
     field(DTYP, "Soft Channel")
+}
+
+record(ao, "$(P)OVP_SET")
+{
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(OVP,i,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)OVP_RB")
+}
+
+record(ai, "$(P)OVP_RB")
+{
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(OVP?,i) $(PORT)")
+    field(PINI, "YES")
+    field(FLNK, "$(P)OVP_RB_")
+}
+
+record(ao, "$(P)OVP_RB_")
+{
+    field( DOL, "$(P)OVP_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)OVP_SET NPP")
+}
+
+record(bo, "$(P)OVM_SET")
+{
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto sendCmd(OVM,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)OVP_RB")
 }

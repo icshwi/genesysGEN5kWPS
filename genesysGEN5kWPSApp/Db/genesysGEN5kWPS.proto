@@ -19,6 +19,9 @@ PollPeriod = $ReplyTimeout;
 
 sendCmd {
     out "\$1";
+    in "%(\$2.VAL)39c";
+    ExtraInput = Ignore;
+    
 }
 
 sendVal {
@@ -33,7 +36,9 @@ getVal {
 }
 
 setVal {
-	out "\$1%\$2";
+    out "\$1 %\$2";
+    in "%(\$3.VAL)39c";
+    ExtraInput = Ignore;
 }
 
 
@@ -77,11 +82,11 @@ getSTTFR {
 getRemoteMode {
     out "RMT?";
     in "%{LOC|REM|LLO}";
-#    ExtraInput = Ignore;
 }
 
 setRemoteMode {
     out "RMT %{LOC|REM|LLO}";
-    in "%(\$1.VAL)s";
+    in "%(\$1.VAL)39c";
     ExtraInput = Ignore;
 }
+
