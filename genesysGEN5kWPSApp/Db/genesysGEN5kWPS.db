@@ -94,7 +94,7 @@ record (ai, "$(P)PC-RB")
 
 
 # Status Condition Register
-record (longin, "$(P)SR-rb_") 
+record (longin, "$(P)SR-RB_") 
 {
     field(DESC, "Status Register RB") 
     field(DTYP, "stream")
@@ -108,7 +108,7 @@ record(calc, "$(P)SR-sts_")
     field(DESC, "8 Bit Status Condition Register")
     field(SCAN, "Passive")
     field(CALC, "(A&0x00000FF)")
-    field(INPA, "$(P)SR-rb_ CPP")
+    field(INPA, "$(P)SR-RB_ CPP")
     field(FLNK, "$(P)SR-BIT-STS")
 }
 
@@ -122,14 +122,14 @@ record(mbbiDirect, "$(P)SR-BIT-STS")
 record(mbbi, "$(P)SR-BIT-DESC")
 {
     field(DESC, "8 Bit Status Condition Register Desc")
-    field(ZRST, "CV : Constant Voltage")
-    field(ONST, "CC : Constant Currrent")
-    field(TWST, "NFLT : No Fault")
-    field(THST, "FLT : Fault active")
-    field(FRST, "AST : Auto-Restart Enabled")
-    field(FVST, "FDE : Fold Enabled")
+    field(ZRST, "CV:Constant Voltage")
+    field(ONST, "CC:Constant Currrent")
+    field(TWST, "NFLT:No Fault")
+    field(THST, "FLT:Fault active")
+    field(FRST, "AST:Auto-Restart Enabled")
+    field(FVST, "FDE:Fold Enabled")
     field(SXST, "Spare")
-    field(SVST, "LCL : Local Mode")
+    field(SVST, "LCL:Local Mode")
     field(EISV, "INVALID")
     field(NISV, "INVALID")
     field(TESV, "INVALID")
@@ -147,7 +147,7 @@ record(mbbi, "$(P)SR-BIT-DESC")
 
 # Fault Condition Register
 
-record (longin, "$(P)FR-rb_") 
+record (longin, "$(P)FR-RB_") 
 {
     field(DESC, "Fault Condition Register RB") 
     field(DTYP, "stream")
@@ -161,7 +161,7 @@ record(calc, "$(P)FR-sts_")
     field(DESC, "8 Bit Falut Condition Register")
     field(SCAN, "Passive")
     field(CALC, "(A&0x00000FF)")
-    field(INPA, "$(P)FR-rb_ CPP")
+    field(INPA, "$(P)FR-RB_ CPP")
     field(FLNK, "$(P)FR-BIT-STS")
 }
 
@@ -176,13 +176,13 @@ record(mbbi, "$(P)FR-BIT-DESC")
 {
     field(DESC, "8 Bit Fault Condition Register Desc")
     field(ZRST, "Spare")
-    field(ONST, "AC : AC Fail")
-    field(TWST, "OTP : Over Temperature")
-    field(THST, "FOLD : Foldback")
-    field(FRST, "OVP : Over Voltage")
-    field(FVST, "SO : Shut Off")
-    field(SXST, "OFF : Output Off")
-    field(SVST, "ENA : Enable")
+    field(ONST, "AC:AC Fail")
+    field(TWST, "OTP:Over Temperature")
+    field(THST, "FOLD:Foldback")
+    field(FRST, "OVP:Over Voltage")
+    field(FVST, "SO:Shut Off")
+    field(SXST, "OFF:Output Off")
+    field(SVST, "ENA:Enable")
     field(EISV, "INVALID")
     field(NISV, "INVALID")
     field(TESV, "INVALID")
@@ -195,4 +195,79 @@ record(mbbi, "$(P)FR-BIT-DESC")
     field(UNSV, "INVALID")
 }
 
+record(mbbo, "$(P)RMT_SET")
+{
+    field(DESC, "Set PS to local or remote mode")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setRemoteMode($(P)RMT_SET_RB_) $(PORT)")
+    field(ZRST, "Local")
+    field(ZRVL, "0")
+    field(ONST, "Remote")
+    field(ONVL, "1")
+    field(TWST, "Local Lockout")
+    field(TWVL, "2")
+    field(THSV, "INVALID")
+    field(FRSV, "INVALID")
+    field(FVSV, "INVALID")
+    field(SXSV, "INVALID")
+    field(SVSV, "INVALID")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+    field(IVOA, "Don't drive outputs")
+    field(FLNK, "$(P)RMT_RB")
+}
 
+
+record(mbbi, "$(P)RMT_RB")
+{
+    field(DESC, "Remote Mode Status")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getRemoteMode $(PORT)")
+    field(ZRST, "Local")
+    field(ZRVL, "0")
+    field(ONST, "Remote")
+    field(ONVL, "1")
+    field(TWST, "Local Lockout")
+    field(TWVL, "2")
+    field(THSV, "INVALID")
+    field(FRSV, "INVALID")
+    field(FVSV, "INVALID")
+    field(SXSV, "INVALID")
+    field(SVSV, "INVALID")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+    field(PINI, "YES")
+    field(FLNK, "$(P)RMT_RB_")
+}
+
+
+
+record(mbbo, "$(P)RMT_RB_")
+{
+    field( DOL, "$(P)RMT_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)RMT_SET NPP")
+}
+
+
+record(stringin, "$(P)RMT_SET_RB_")
+{
+    field(DESC, "RMT SET Reply")
+    field(DTYP, "Soft Channel")
+}

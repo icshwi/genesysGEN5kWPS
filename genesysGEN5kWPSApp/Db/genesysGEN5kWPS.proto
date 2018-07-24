@@ -8,9 +8,13 @@
 #  Date    : Tuesday, July 24 13:50:38 CEST 2018
 #  version : 0.0.1
 #
-    
+
+LockTimeout = 5000;
 ReplyTimeout = 1000;
-ReadTimeout  = 300;
+ReadTimeout = 300;
+WriteTimeout = 300;
+PollPeriod = $ReplyTimeout;
+
 
 
 sendCmd {
@@ -69,3 +73,15 @@ getSTTFR {
     in "MV(%*f),PV(%*f),MC(%*f),PC(%*f),SR(%*2X),FR(%2X)"
 }
 
+
+getRemoteMode {
+    out "RMT?";
+    in "%{LOC|REM|LLO}";
+#    ExtraInput = Ignore;
+}
+
+setRemoteMode {
+    out "RMT %{LOC|REM|LLO}";
+    in "%(\$1.VAL)s";
+    ExtraInput = Ignore;
+}
