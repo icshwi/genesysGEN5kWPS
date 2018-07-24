@@ -285,6 +285,7 @@ record(ai, "$(P)OVP_RB")
 {
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(OVP?,i) $(PORT)")
+    field( EGU, "V")
     field(PINI, "YES")
     field(FLNK, "$(P)OVP_RB_")
 }

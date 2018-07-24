@@ -13,7 +13,9 @@ epicsEnvSet(R, RFLab)
 
 epicsEnvSet("IOCST", "$(P)-$(R):IocStats")
 
-cd "${TOP}"
+< $(TOP)/iocBoot/$(IOC)/GEN300-17-env.cmd
+
+cd "$(TOP)"
 
 ## Register all support components
 dbLoadDatabase "dbd/genesysGEN5kWPS.dbd"
@@ -34,7 +36,7 @@ asynOctetSetInputEos($(PORT), 0, "\r")
 asynOctetSetOutputEos($(PORT), 0, "\r")
 
 dbLoadRecords("db/iocAdminSoft.db",  "IOC=${IOCST}")
-dbLoadRecords("db/genesysGEN5kWPS.db", "P=$(P)-$(R):GEN5kWPS:,PORT=$(PORT),OVPMIN=5.0,OVPMAX=330")
+dbLoadRecords("db/genesysGEN5kWPS.db", "P=$(P)-$(R):GEN5kWPS:,PORT=$(PORT),OVPMIN=$(OVPMIN),OVPMAX=$(OVPMAX)")
 dbLoadRecords("db/stream_raw.db", "P=$(P)-$(R):,PORT=$(PORT)")
 
 cd "${TOP}/iocBoot/${IOC}"
