@@ -276,6 +276,8 @@ record(ao, "$(P)OVP_SET")
 {
     field(DTYP, "stream")
     field( OUT, "@genesysGEN5kWPS.proto setVal(OVP,i,$(P)ACK_MSG_RB) $(PORT)")
+    field(HOPR, "$(OVPMAX)")
+    field(LOPR, "$(OVPMIN)")
     field(FLNK, "$(P)OVP_RB")
 }
 
