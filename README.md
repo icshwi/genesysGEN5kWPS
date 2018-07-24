@@ -1,7 +1,6 @@
-# TDK-Lambda Genesys GEN300
+# TDK-Lambda Genesys GEN300 5kW Power Supply
 
-[![Build Status](https://travis-ci.org/icshwi/fimscb.svg?branch=master)](https://travis-ci.org/icshwi/fimscb)
-
+[![Build Status](https://travis-ci.org/icshwi/genesysGEN5kWPS.svg?branch=master)](https://travis-ci.org/icshwi/genesysGEN5kWPS)
 
 ## EPICS IOC
 
