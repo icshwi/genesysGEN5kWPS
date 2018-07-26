@@ -90,3 +90,15 @@ setRemoteMode {
     ExtraInput = Ignore;
 }
 
+#----------------------------------------------------------------------
+# on/off
+#
+setAST {
+    out "AST %{1|0}";
+    in "%(\$1.VAL)39c";
+    ExtraInput = Ignore;
+}
+
+getAST {
+    out "AST?";
+}

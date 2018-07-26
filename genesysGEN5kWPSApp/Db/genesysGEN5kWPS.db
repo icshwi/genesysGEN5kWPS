@@ -14,14 +14,31 @@ record(bo, "$(P)InfoUpdate-Cmd")
 
 record(fanout, "$(P)InfoUpdate:1-Fout_")
 {
-    field(LNK1, "$(P)MODEL-RB")
-    field(LNK2, "$(P)SN-RB")
-    field(LNK3, "$(P)SWVersion-RB")
-    field(LNK4, "$(P)Date-RB")
+    field(LNK1, "$(P)MODEL_RB")
+    field(LNK2, "$(P)SN_RB")
+    field(LNK3, "$(P)SWVersion_RB")
+    field(LNK4, "$(P)Date_RB")
+    field(LNK5, "$(P)InfoUpdate:2-Fout_")
 }
 
+
+## Read the machine setting values when IOC is started
+## 
+record(fanout, "$(P)InfoUpdate:2-Fout_")
+{
+    field(LNK1, "$(P)AutoStart_RB")
+    field(LNK2, "$(P)Foldback_RB")
+    field(LNK3, "$(P)FoldbackDelay_RB")
+    field(LNK4, "$(P)Output_RB")
+    field(LNK5, "$(P)OVP_RB")
+    field(LNK6, "$(P)RMT_RB")
+   
+}
+
+
+### 7.7.4 ID Control Commands 
 # IDN?
-record(stringin, "$(P)MODEL-RB")
+record(stringin, "$(P)MODEL_RB")
 {
     field(DESC, "Model Name")
     field(DTYP, "stream")
@@ -29,7 +46,7 @@ record(stringin, "$(P)MODEL-RB")
 }
 
 # SN?
-record(stringin, "$(P)SN-RB")
+record(stringin, "$(P)SN_RB")
 {
     field(DESC, "Unit Serial Number")
     field(DTYP, "stream")
@@ -37,34 +54,277 @@ record(stringin, "$(P)SN-RB")
 }
 
 # REV?
-record(stringin, "$(P)SWVersion-RB")
+record(stringin, "$(P)SWVersion_RB")
 {
     field(DESC, "Software Version")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(REV?,40c) $(PORT)")
-}
+}  
 
 # DATE?
-record(stringin, "$(P)Date-RB")
+record(stringin, "$(P)Date_RB")
 {
     field(DESC, "Last Test Date")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(DATE?,40c) $(PORT)")
 }
 
+# # DATE?
+# record(stringin, "$(P)Mode_RB")
+# {
+#     field(DESC, "Power Supply Operation Mode")
+#     field(DTYP, "stream")
+#     field( INP, "@genesysGEN5kWPS.proto getVal(MODE?,40c) $(PORT)")
+# }
+
+
+# record(calc, "$(P)Mode_sts_")
+# {
+#     field(SCAN, "Passive")
+#     field(CALC, "A")
+#     field(INPA, "$(P)Output_RB CPP")
+#     field(FLNK, "$(P)Mode_RB")
+# }
+
+
+
+
+### 7.7.5 Ooutput control commands
+
+
+## PV : Actual Output Voltage is $(P)MV_RB
+record(ao, "$(P)Voltage_SP")
+{
+    field(DESC, "Output Voltage Value")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(PV,f,$(P)ACK_MSG_RB) $(PORT)")
+    field( EGU, "V")
+    field(HOPR, "$(VMAX)")
+    field(LOPR, "$(VMIN)")
+    field(FLNK, "$(P)Voltage_RB")
+}
+
+record(ai, "$(P)Voltage_RB")
+{
+    field(DESC, "Output Voltage Value SET RB")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(PV?,f) $(PORT)")
+    field( EGU, "V")
+    field(PINI, "YES")
+    field(FLNK, "$(P)Voltage_RB_")
+}
+
+record(ao, "$(P)Voltage_RB_")
+{
+    field( DOL, "$(P)Voltage_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)Voltage_SP NPP")
+}
+#
+
+
+## PC : Actual Output Current is $(P)MC_RB
+record(ao, "$(P)Current_SP")
+{
+    field(DESC, "Output Current Value")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(PC,f,$(P)ACK_MSG_RB) $(PORT)")
+    field( EGU, "A")
+    field(HOPR, "$(VMAX)")
+    field(LOPR, "$(VMIN)")
+    field(FLNK, "$(P)Current_RB")
+}
+
+record(ai, "$(P)Current_RB")
+{
+    field(DESC, "Output Current Value SET RB")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(PC?,f) $(PORT)")
+    field( EGU, "A")
+    field(PINI, "YES")
+    field(FLNK, "$(P)Current_RB_")
+}
+
+record(ao, "$(P)Current_RB_")
+{
+    field( DOL, "$(P)Current_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)Current_SP NPP")
+}
+#
+
+
+
+## OUT
+record(bo, "$(P)Output_SP")
+{
+    field(DESC, "Output ON/OFF")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(OUT,{0|1},$(P)ACK_MSG_RB) $(PORT)")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+    field(FLNK, "$(P)Output_RB")
+}
+
+
+record(bi, "$(P)Output_RB")
+{
+    field(DESC, "Output ON/OFF")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(OUT?,39c) $(PORT)")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+    field(FLNK, "$(P)Output_RB_")
+}
+
+record(bo, "$(P)Output_RB_")
+{
+    field( DOL, "$(P)Output_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)Output_SP NPP")
+}
+
+
+
+## FLD
+record(bo, "$(P)Foldback_SP")
+{
+    field(DESC, "Foldback ON/OFF")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(FLD,{0|1},$(P)ACK_MSG_RB) $(PORT)")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+    field(FLNK, "$(P)Foldback_RB")
+}
+
+record(bi, "$(P)Foldback_RB")
+{
+    field(DESC, "Foldback ON/OFF")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(FLD?,39c) $(PORT)")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+    field(FLNK, "$(P)Foldback-Fout_")
+}
+
+record(fanout, "$(P)Foldback-Fout_")
+{
+    field(LNK1, "$(P)Foldback_RB_")
+    field(LNK2, "$(P)Output_RB PP")
+}
+
+record(bo, "$(P)Foldback_RB_")
+{
+    field( DOL, "$(P)Foldback_RB NPP")
+    field(OMSL, "closed_loop")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
+    field( OUT, "$(P)Foldback_SP NPP")
+}
+
+
+## FBD
+record(ao, "$(P)FoldbackDelay_SP")
+{
+    field(DESC, "FoldbackDelay")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(FBD,i,$(P)ACK_MSG_RB) $(PORT)")
+    field( EGU, "decisecond")
+    field(HOPR, "255")
+    field(LOPR, "0")
+    field(FLNK, "$(P)FoldbackDelay_RB")
+}
+
+record(ai, "$(P)FoldbackDelay_RB")
+{
+    field(DESC, "FoldbackDelay ON/OFF")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(FBD?,i) $(PORT)")
+    field( EGU, "decisecond")
+    field(FLNK, "$(P)FoldbackDelay_RB_")
+}
+
+record(ao, "$(P)FoldbackDelay_RB_")
+{
+    field( DOL, "$(P)FoldbackDelay_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)FoldbackDelay_SP NPP")
+}
+
+## FBDRST 
+record(bo, "$(P)FoldbackDelay_RST")
+{
+    field(DESC, "Foldback Delay to Zero")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto sendCmd(FBDRST,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)FoldbackDelay_RB")
+}
+
+
+
+## SAV
+record(bo, "$(P)SavePresentSetting_SET")
+{
+    field(DESC, "Save present settings")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto sendCmd(SAV,$(P)ACK_MSG_RB) $(PORT)")
+}
+
+## RCL
+record(bo, "$(P)RecallLastSettings_SET")
+{
+    field(DESC, "Save present settings")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto sendCmd(RCL,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)InfoUpdate:2-Fout_")
+}
+
+
+
+
+## AST
+record(bo, "$(P)AutoStart_SP")
+{
+    field(DESC, "Auto-restart Mode ON/OFF")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(AST,{1|0},$(P)ACK_MSG_RB) $(PORT)")
+    field(ZNAM, "ON")
+    field(ONAM, "OFF")
+    field(FLNK, "$(P)AutoStart_RB")
+}
+
+record(bi, "$(P)AutoStart_RB")
+{
+    field(DESC, "Auto-restart Mode ON/OFF")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(AST?,39c) $(PORT)")
+    field(ZNAM, "ON")
+    field(ONAM, "OFF")
+    field(FLNK, "$(P)AutoStart_RB_")
+}
+
+record(bo, "$(P)AutoStart_RB_")
+{
+    field( DOL, "$(P)AutoStart_RB NPP")
+    field(OMSL, "closed_loop")
+    field(ZNAM, "ON")
+    field(ONAM, "OFF")
+    field( OUT, "$(P)AutoStart_SP NPP")
+}
+
 
 
 # Real the complete power supply  status
-record (ai, "$(P)MV-RB") 
+record (ai, "$(P)MV_RB") 
 {
     field(DESC, "Actual Output Voltage RB") 
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getSTTMV $(PORT)")
     field( EGU, "V")
-    field(SCAN, "1 second")
+#    field(SCAN, "1 second")
 }
 
-record (ai, "$(P)PV-RB") 
+record (ai, "$(P)PV_RB") 
 {
     field(DESC, "Output Voltage Setting RB") 
     field(DTYP, "stream")
@@ -73,7 +333,7 @@ record (ai, "$(P)PV-RB")
     field(SCAN, "I/O Intr")
 }
 
-record (ai, "$(P)MC-RB") 
+record (ai, "$(P)MC_RB") 
 {
     field(DESC, "Actual Output Current RB") 
     field(DTYP, "stream")
@@ -82,7 +342,7 @@ record (ai, "$(P)MC-RB")
     field(SCAN, "I/O Intr")
 }
 
-record (ai, "$(P)PC-RB") 
+record (ai, "$(P)PC_RB") 
 {
     field(DESC, "Output Current Setting RB") 
     field(DTYP, "stream")
@@ -94,7 +354,7 @@ record (ai, "$(P)PC-RB")
 
 
 # Status Condition Register
-record (longin, "$(P)SR-RB_") 
+record (longin, "$(P)SR_RB_") 
 {
     field(DESC, "Status Register RB") 
     field(DTYP, "stream")
@@ -108,7 +368,7 @@ record(calc, "$(P)SR-sts_")
     field(DESC, "8 Bit Status Condition Register")
     field(SCAN, "Passive")
     field(CALC, "(A&0x00000FF)")
-    field(INPA, "$(P)SR-RB_ CPP")
+    field(INPA, "$(P)SR_RB_ CPP")
     field(FLNK, "$(P)SR-BIT-STS")
 }
 
@@ -147,7 +407,7 @@ record(mbbi, "$(P)SR-BIT-DESC")
 
 # Fault Condition Register
 
-record (longin, "$(P)FR-RB_") 
+record (longin, "$(P)FR_RB_") 
 {
     field(DESC, "Fault Condition Register RB") 
     field(DTYP, "stream")
@@ -161,7 +421,7 @@ record(calc, "$(P)FR-sts_")
     field(DESC, "8 Bit Falut Condition Register")
     field(SCAN, "Passive")
     field(CALC, "(A&0x00000FF)")
-    field(INPA, "$(P)FR-RB_ CPP")
+    field(INPA, "$(P)FR_RB_ CPP")
     field(FLNK, "$(P)FR-BIT-STS")
 }
 
@@ -195,7 +455,7 @@ record(mbbi, "$(P)FR-BIT-DESC")
     field(UNSV, "INVALID")
 }
 
-record(mbbo, "$(P)RMT_SET")
+record(mbbo, "$(P)RMT_SP")
 {
     field(DESC, "Set PS to local or remote mode")
     field(DTYP, "stream")
@@ -262,7 +522,7 @@ record(mbbo, "$(P)RMT_RB_")
 {
     field( DOL, "$(P)RMT_RB NPP")
     field(OMSL, "closed_loop")
-    field( OUT, "$(P)RMT_SET NPP")
+    field( OUT, "$(P)RMT_SP NPP")
 }
 
 
@@ -272,7 +532,7 @@ record(stringin, "$(P)ACK_MSG_RB")
     field(DTYP, "Soft Channel")
 }
 
-record(ao, "$(P)OVP_SET")
+record(ao, "$(P)OVP_SP")
 {
     field(DTYP, "stream")
     field( OUT, "@genesysGEN5kWPS.proto setVal(OVP,i,$(P)ACK_MSG_RB) $(PORT)")
@@ -286,20 +546,21 @@ record(ai, "$(P)OVP_RB")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(OVP?,i) $(PORT)")
     field( EGU, "V")
-    field(PINI, "YES")
-    field(FLNK, "$(P)OVP_RB_")
+     field(FLNK, "$(P)OVP_RB_")
 }
 
 record(ao, "$(P)OVP_RB_")
 {
     field( DOL, "$(P)OVP_RB NPP")
     field(OMSL, "closed_loop")
-    field( OUT, "$(P)OVP_SET NPP")
+    field( OUT, "$(P)OVP_SP NPP")
 }
 
-record(bo, "$(P)OVM_SET")
+record(bo, "$(P)OVM_SP")
 {
     field(DTYP, "stream")
     field( OUT, "@genesysGEN5kWPS.proto sendCmd(OVM,$(P)ACK_MSG_RB) $(PORT)")
     field(FLNK, "$(P)OVP_RB")
 }
+
+
