@@ -50,7 +50,7 @@ record(stringin, "$(P)SN_RB")
 {
     field(DESC, "Unit Serial Number")
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getVal(SN?,40c) $(PORT)")
+    field( INP, "@genesysGEN5kWPS.proto getVal(SN?,39c) $(PORT)")
 }
 
 # REV?
@@ -58,7 +58,7 @@ record(stringin, "$(P)SWVersion_RB")
 {
     field(DESC, "Software Version")
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getVal(REV?,40c) $(PORT)")
+    field( INP, "@genesysGEN5kWPS.proto getVal(REV?,39c) $(PORT)")
 }  
 
 # DATE?
@@ -66,7 +66,7 @@ record(stringin, "$(P)Date_RB")
 {
     field(DESC, "Last Test Date")
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getVal(DATE?,40c) $(PORT)")
+    field( INP, "@genesysGEN5kWPS.proto getVal(DATE?,39c) $(PORT)")
 }
 
 # # DATE?
@@ -74,7 +74,7 @@ record(stringin, "$(P)Date_RB")
 # {
 #     field(DESC, "Power Supply Operation Mode")
 #     field(DTYP, "stream")
-#     field( INP, "@genesysGEN5kWPS.proto getVal(MODE?,40c) $(PORT)")
+#     field( INP, "@genesysGEN5kWPS.proto getVal(MODE?,39c) $(PORT)")
 # }
 
 
@@ -287,9 +287,9 @@ record(bo, "$(P)AutoStart_SP")
 {
     field(DESC, "Auto-restart Mode ON/OFF")
     field(DTYP, "stream")
-    field( OUT, "@genesysGEN5kWPS.proto setVal(AST,{1|0},$(P)ACK_MSG_RB) $(PORT)")
-    field(ZNAM, "ON")
-    field(ONAM, "OFF")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(AST,{0|1},$(P)ACK_MSG_RB) $(PORT)")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
     field(FLNK, "$(P)AutoStart_RB")
 }
 
@@ -298,8 +298,8 @@ record(bi, "$(P)AutoStart_RB")
     field(DESC, "Auto-restart Mode ON/OFF")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(AST?,39c) $(PORT)")
-    field(ZNAM, "ON")
-    field(ONAM, "OFF")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
     field(FLNK, "$(P)AutoStart_RB_")
 }
 
@@ -307,8 +307,6 @@ record(bo, "$(P)AutoStart_RB_")
 {
     field( DOL, "$(P)AutoStart_RB NPP")
     field(OMSL, "closed_loop")
-    field(ZNAM, "ON")
-    field(ONAM, "OFF")
     field( OUT, "$(P)AutoStart_SP NPP")
 }
 
