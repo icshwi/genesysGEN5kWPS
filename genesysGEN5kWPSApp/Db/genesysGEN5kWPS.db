@@ -1,5 +1,13 @@
 
 
+record(stringin, "$(P)ACK_MSG_RB")
+{
+    field(DESC, "Acknowlege Message")
+    field(DTYP, "Soft Channel")
+}
+
+
+
 # Query one-time parameters (Name and Firmware)
 record(bo, "$(P)InfoUpdate-Cmd")
 {
@@ -18,7 +26,8 @@ record(fanout, "$(P)InfoUpdate:1-Fout_")
     field(LNK2, "$(P)SN_RB")
     field(LNK3, "$(P)SWVersion_RB")
     field(LNK4, "$(P)Date_RB")
-    field(LNK5, "$(P)InfoUpdate:2-Fout_")
+    field(LNK5, "$(P)MultiDropSupport_RB")
+    field(LNK6, "$(P)InfoUpdate:2-Fout_")
 }
 
 
@@ -31,9 +40,152 @@ record(fanout, "$(P)InfoUpdate:2-Fout_")
     field(LNK3, "$(P)FoldbackDelay_RB")
     field(LNK4, "$(P)Output_RB")
     field(LNK5, "$(P)OVP_RB")
-    field(LNK6, "$(P)RMT_RB")
+    field(LNK6, "$(P)UVL_RB")
+    field(LNK7, "$(P)RMT_RB")
+    field(LNK8, "$(P)StatusEnableRegister_RB_")
+    field(LNK9, "$(P)FaultEnableRegister_RB_")
+  
+}
+
+## Read the machine setting values with SCAN 
+## Don't use the following measurement as 
+## any safety related subjects.
+
+record(fanout, "$(P)ScanUpdate:-Fout_")
+{
+    field(LNK1, "$(P)ActualVoltage_RB")
+    field(LNK2, "$(P)Mode_RB")
+    field(LNK3, "$(P)StatusRegister_RB_")
+    field(LNK4, "$(P)FaultRegister_RB_")
+    field(SCAN, "1 second")
    
 }
+
+# Manually call UpdateEvents through
+# UpdateEvents.PROC 1, because the command
+# will reset its status bit after reading value
+# However, we don't rely on these. Instead of them
+# we can access FLT? and STATS? directly.
+
+
+record(fanout, "$(P)UpdateEvents")
+{
+    field(LNK1, "$(P)StatusEventRegister_RB_")
+    field(LNK2, "$(P)FaultEventRegister_RB_")
+}
+
+## 7.7.3 Initialization control commands
+
+## CLS : Clear Event Status
+## Set FEVE and SEVE registers to zero
+record(bo, "$(P)ClearEvent")
+{
+    field(DESC, "Clear the Status")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto sendCmd(CLS,$(P)ACK_MSG_RB) $(PORT)")
+}
+
+## RST : Reset command. Brings the power supply to a safe and known state
+## Output voltage, current (SCAN 1 second)
+## Remote    (LNK7)
+## Auto-start(LNK1)
+## Output    (LNK4)
+## FOLD      (LNK2/3)
+## OVP       (LNK5)
+## UVL       (LNK6)
+## FLT and STAT will be updated
+record(bo, "$(P)Reset")
+{
+    field(DESC, "Reset the Power Supply")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto sendCmd(RST,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)InfoUpdate:2-Fout_")
+}
+
+
+## RMT : Set the power supply to local or remode mode
+record(mbbo, "$(P)RMT_SP")
+{
+    field(DESC, "Set PS to local or remote mode")
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setRemoteMode($(P)ACK_MSG_RB) $(PORT)")
+    field(ZRST, "Local")
+    field(ZRVL, "0")
+    field(ONST, "Remote")
+    field(ONVL, "1")
+    field(TWST, "Local Lockout")
+    field(TWVL, "2")
+    field(THSV, "INVALID")
+    field(FRSV, "INVALID")
+    field(FVSV, "INVALID")
+    field(SXSV, "INVALID")
+    field(SVSV, "INVALID")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+    field(IVOA, "Don't drive outputs")
+    field(FLNK, "$(P)RMT_RB")
+}
+
+# Returns the remote mode settings
+record(mbbi, "$(P)RMT_RB")
+{
+    field(DESC, "Remote Mode Status")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getRemoteMode $(PORT)")
+    field(ZRST, "Local")
+    field(ZRVL, "0")
+    field(ONST, "Remote")
+    field(ONVL, "1")
+    field(TWST, "Local Lockout")
+    field(TWVL, "2")
+    field(THSV, "INVALID")
+    field(FRSV, "INVALID")
+    field(FVSV, "INVALID")
+    field(SXSV, "INVALID")
+    field(SVSV, "INVALID")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+    field(PINI, "YES")
+    field(FLNK, "$(P)RMT_RB_")
+}
+
+record(mbbo, "$(P)RMT_RB_")
+{
+    field( DOL, "$(P)RMT_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)RMT_SP NPP")
+}
+
+
+## MDAV?
+## Return Multi-drop unit installed
+record(bi, "$(P)MultiDropSupport_RB")
+{
+    field(DESC, "MD Installed")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(MDAV?,i) $(PORT)")
+    field(ZNAM, "NO")
+    field(ONAM, "YES")
+}
+
+
+
 
 
 ### 7.7.4 ID Control Commands 
@@ -43,6 +195,7 @@ record(stringin, "$(P)MODEL_RB")
     field(DESC, "Model Name")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getModel $(PORT)")
+    field(PINI, "YES")
 }
 
 # SN?
@@ -69,30 +222,12 @@ record(stringin, "$(P)Date_RB")
     field( INP, "@genesysGEN5kWPS.proto getVal(DATE?,39c) $(PORT)")
 }
 
-# # DATE?
-# record(stringin, "$(P)Mode_RB")
-# {
-#     field(DESC, "Power Supply Operation Mode")
-#     field(DTYP, "stream")
-#     field( INP, "@genesysGEN5kWPS.proto getVal(MODE?,39c) $(PORT)")
-# }
-
-
-# record(calc, "$(P)Mode_sts_")
-# {
-#     field(SCAN, "Passive")
-#     field(CALC, "A")
-#     field(INPA, "$(P)Output_RB CPP")
-#     field(FLNK, "$(P)Mode_RB")
-# }
 
 
 
 
-### 7.7.5 Ooutput control commands
-
-
-## PV : Actual Output Voltage is $(P)MV_RB
+### 7.7.5 Output control commands
+## PV : Actual Output Voltage is $(P)ActualVoltage_RB
 record(ao, "$(P)Voltage_SP")
 {
     field(DESC, "Output Voltage Value")
@@ -120,10 +255,9 @@ record(ao, "$(P)Voltage_RB_")
     field(OMSL, "closed_loop")
     field( OUT, "$(P)Voltage_SP NPP")
 }
-#
 
 
-## PC : Actual Output Current is $(P)MC_RB
+## PC : Actual Output Current is $(P)ActualCurrent_RB
 record(ao, "$(P)Current_SP")
 {
     field(DESC, "Output Current Value")
@@ -152,6 +286,47 @@ record(ao, "$(P)Current_RB_")
     field( OUT, "$(P)Current_SP NPP")
 }
 #
+
+## MV? and MC? can be replaced with DVC?, because it sends the command once
+## in order to get MV? and MC? Others are ignored, because we don't need to
+## have them within 1 or scan period
+
+# record(ai, "$(P)ActualVoltage_RB")
+# {
+#     field(DESC, "Actual Voltage Value")
+#     field(DTYP, "stream")
+#     field( INP, "@genesysGEN5kWPS.proto getVal(MV?,f) $(PORT)")
+#     field( EGU, "V")
+#     field(SCAN, "1 second")
+#     field(FLNK, "$(P)ActualCurrent_RB")
+# }
+
+# record(ai, "$(P)ActualCurrent_RB")
+# {
+#     field(DESC, "Actual Current Value")
+#     field(DTYP, "stream")
+#     field( INP, "@genesysGEN5kWPS.proto getVal(MC?,f) $(PORT)")
+#     field( EGU, "A")
+# #    field(SCAN, "I/O Intr")
+# }
+
+
+record(ai, "$(P)ActualVoltage_RB")
+{
+    field(DESC, "Actual Voltage Value")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getDVCMV $(PORT)")
+    field( EGU, "V")
+ }
+
+record(ai, "$(P)ActualCurrent_RB")
+{
+    field(DESC, "Actual Current Value")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getDVCMC $(PORT)")
+    field( EGU, "A")
+    field(SCAN, "I/O Intr")
+}
 
 
 
@@ -310,74 +485,114 @@ record(bo, "$(P)AutoStart_RB_")
     field( OUT, "$(P)AutoStart_SP NPP")
 }
 
-
-
-# Real the complete power supply  status
-record (ai, "$(P)MV_RB") 
+record(ao, "$(P)OVP_SP")
 {
-    field(DESC, "Actual Output Voltage RB") 
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getSTTMV $(PORT)")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(OVP,i,$(P)ACK_MSG_RB) $(PORT)")
+    field(HOPR, "$(OVPMAX)")
+    field(LOPR, "$(OVPMIN)")
+    field(FLNK, "$(P)OVP_RB")
+}
+
+record(ai, "$(P)OVP_RB")
+{
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(OVP?,i) $(PORT)")
     field( EGU, "V")
-    field(SCAN, "1 second")
+    field(FLNK, "$(P)OVP_RB_")
 }
 
-record (ai, "$(P)PV_RB") 
+record(ao, "$(P)OVP_RB_")
 {
-    field(DESC, "Output Voltage Setting RB") 
+    field( DOL, "$(P)OVP_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)OVP_SP NPP")
+}
+
+record(bo, "$(P)OVM_SP")
+{
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getSTTPV $(PORT)")
+    field( OUT, "@genesysGEN5kWPS.proto sendCmd(OVM,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)OVP_RB")
+}
+
+
+
+record(ao, "$(P)UVL_SP")
+{
+    field(DTYP, "stream")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(UVL,i,$(P)ACK_MSG_RB) $(PORT)")
+    field(HOPR, "$(UVLMAX)")
+    field(LOPR, "$(UVLMIN)")
+    field(FLNK, "$(P)UVL_RB")
+}
+
+record(ai, "$(P)UVL_RB")
+{
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(UVL?,i) $(PORT)")
     field( EGU, "V")
-    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)UVL_RB_")
 }
 
-record (ai, "$(P)MC_RB") 
+record(ao, "$(P)UVL_RB_")
 {
-    field(DESC, "Actual Output Current RB") 
-    field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getSTTMC $(PORT)")
-    field( EGU, "A")
-    field(SCAN, "I/O Intr")
+    field( DOL, "$(P)UVL_RB NPP")
+    field(OMSL, "closed_loop")
+    field( OUT, "$(P)UVL_SP NPP")
 }
 
-record (ai, "$(P)PC_RB") 
+
+# MODE?
+record(stringin, "$(P)Mode_RB")
 {
-    field(DESC, "Output Current Setting RB") 
+    field(DESC, "Power Supply Operation Mode")
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getSTTPC $(PORT)")
-    field( EGU, "A")
-    field(SCAN, "I/O Intr")
+    field( INP, "@genesysGEN5kWPS.proto getVal(MODE?,39c) $(PORT)")
 }
+
+
+# MS?
+record(stringin, "$(P)MasterSlaveSetting_RB")
+{
+    field(DESC, "Master Slave Setting")
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(MS?,39c) $(PORT)")
+    field(PINI, "YES")
+}
+
+
+
 
 
 
 # Status Condition Register
-record (longin, "$(P)SR_RB_") 
+record (ai, "$(P)StatusRegister_RB_") 
 {
     field(DESC, "Status Register RB") 
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getSTTSR $(PORT)")
-    field(SCAN, "I/O Intr")
+    field( INP, "@genesysGEN5kWPS.proto getVal(STAT?,2X) $(PORT)")
+
 }
 
 
-record(calc, "$(P)SR-sts_")
+record(calc, "$(P)StatusRegister-sts_")
 {
     field(DESC, "8 Bit Status Condition Register")
     field(SCAN, "Passive")
     field(CALC, "(A&0x00000FF)")
-    field(INPA, "$(P)SR_RB_ CPP")
-    field(FLNK, "$(P)SR-BIT-STS")
+    field(INPA, "$(P)StatusRegister_RB_ CPP")
+    field(FLNK, "$(P)StatusRegister-BIT-RB")
 }
 
-record(mbbiDirect, "$(P)SR-BIT-STS")
+record(mbbiDirect, "$(P)StatusRegister-BIT-RB")
 {
     field(DESC, "Status Condition Register")
     field(SCAN, "Passive")
-    field( INP, "$(P)SR-sts_.VAL")
+    field( INP, "$(P)StatusRegister-sts_.VAL")
 }
 
-record(mbbi, "$(P)SR-BIT-DESC")
+record(mbbi, "$(P)StatusRegister-BIT-DESC")
 {
     field(DESC, "8 Bit Status Condition Register Desc")
     field(ZRST, "CV:Constant Voltage")
@@ -402,38 +617,155 @@ record(mbbi, "$(P)SR-BIT-DESC")
 
 
 
-
-# Fault Condition Register
-
-record (longin, "$(P)FR_RB_") 
+## Status Enable Register
+## By default, enable all (FF)
+## even if FF, the actual value will be returned to 8F
+## 
+record(stringout, "$(P)StatusEnableRegister_SP") 
 {
-    field(DESC, "Fault Condition Register RB") 
+    field(DESC, "Status Enable Register SP") 
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getSTTFR $(PORT)")
-    field(SCAN, "I/O Intr")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(SENA,s,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)StatusEnableRegister_RB_")
+    field(PINI, "YES")
+    field( VAL , "FF")
+    
+}
+    
+record(ai, "$(P)StatusEnableRegister_RB_") 
+{
+    field(DESC, "Status EnableRegister Register RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(SENA?,2X) $(PORT)")
+
 }
 
 
-record(calc, "$(P)FR-sts_")
+record(calc, "$(P)StatusEnableRegister-sts_")
+{
+    field(DESC, "8 Bit Status Enable Register")
+    field(SCAN, "Passive")
+    field(CALC, "(A&0x00000FF)")
+    field(INPA, "$(P)StatusEnableRegister_RB_ CPP")
+    field(FLNK, "$(P)StatusEnableRegister-BIT-RB")
+}
+
+record(mbbiDirect, "$(P)StatusEnableRegister-BIT-RB")
+{
+    field(DESC, "Status Enable Register")
+    field(SCAN, "Passive")
+    field( INP, "$(P)StatusEnableRegister-sts_.VAL")
+}
+
+
+record(mbbi, "$(P)StatusEnableRegister-BIT-DESC")
+{
+    field(DESC, "8 Bit Status Condition Register Desc")
+    field(ZRST, "CV Enable")
+    field(ONST, "CC Enable")
+    field(TWST, "NFLT Enable")
+    field(THST, "FLT Enable")
+    field(FRST, "0")
+    field(FVST, "0")
+    field(SXST, "0")
+    field(SVST, "LCL Enable")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+}
+
+
+## Status Event Register
+record (ai, "$(P)StatusEventRegister_RB_") 
+{
+    field(DESC, "Status Event Register RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(SEVE?,2X) $(PORT)")
+
+}
+
+
+record(calc, "$(P)StatusEventRegister-sts_")
+{
+    field(DESC, "8 Bit Status Enable Register")
+    field(SCAN, "Passive")
+    field(CALC, "(A&0x00000FF)")
+    field(INPA, "$(P)StatusEventRegister_RB_ CPP")
+    field(FLNK, "$(P)StatusEventRegister-BIT-RB")
+}
+
+record(mbbiDirect, "$(P)StatusEventRegister-BIT-RB")
+{
+    field(DESC, "Status Enable Register")
+    field(SCAN, "Passive")
+    field( INP, "$(P)StatusEventRegister-sts_.VAL")
+}
+
+
+record(mbbi, "$(P)StatusEventRegister-BIT-DESC")
+{
+    field(DESC, "8 Bit Status Register Desc")
+    field(ZRST, "CV Evnet")
+    field(ONST, "CC Evnet")
+    field(TWST, "NFLT Evnet")
+    field(THST, "FLT Evnet")
+    field(FRST, "0")
+    field(FVST, "0")
+    field(SXST, "0")
+    field(SVST, "LCL Evnet")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+}
+
+
+
+
+
+# Fault Condition Register
+
+record(ai, "$(P)FaultRegister_RB_") 
+{
+    field(DESC, "Fault Condition Register RB") 
+    field(DTYP, "stream")
+    field( INP, "@genesysGEN5kWPS.proto getVal(FLT?,2X) $(PORT)")
+}
+
+
+record(calc, "$(P)FaultRegister-sts_")
 {
     field(DESC, "8 Bit Falut Condition Register")
     field(SCAN, "Passive")
     field(CALC, "(A&0x00000FF)")
-    field(INPA, "$(P)FR_RB_ CPP")
-    field(FLNK, "$(P)FR-BIT-STS")
+    field(INPA, "$(P)FaultRegister_RB_ CPP")
+    field(FLNK, "$(P)FaultRegister-BIT-RB")
 }
 
-record(mbbiDirect, "$(P)FR-BIT-STS")
+record(mbbiDirect, "$(P)FaultRegister-BIT-RB")
 {
     field(DESC, "Fault Condition Register")
     field(SCAN, "Passive")
-    field( INP, "$(P)FR-sts_.VAL")
+    field( INP, "$(P)FaultRegister-sts_.VAL")
 }
 
-record(mbbi, "$(P)FR-BIT-DESC")
+record(mbbi, "$(P)FaultRegister-BIT-DESC")
 {
     field(DESC, "8 Bit Fault Condition Register Desc")
-    field(ZRST, "Spare")
+    field(ZRST, "Spare 0")
     field(ONST, "AC:AC Fail")
     field(TWST, "OTP:Over Temperature")
     field(THST, "FOLD:Foldback")
@@ -453,112 +785,124 @@ record(mbbi, "$(P)FR-BIT-DESC")
     field(UNSV, "INVALID")
 }
 
-record(mbbo, "$(P)RMT_SP")
-{
-    field(DESC, "Set PS to local or remote mode")
-    field(DTYP, "stream")
-    field( OUT, "@genesysGEN5kWPS.proto setRemoteMode($(P)ACK_MSG_RB) $(PORT)")
-    field(ZRST, "Local")
-    field(ZRVL, "0")
-    field(ONST, "Remote")
-    field(ONVL, "1")
-    field(TWST, "Local Lockout")
-    field(TWVL, "2")
-    field(THSV, "INVALID")
-    field(FRSV, "INVALID")
-    field(FVSV, "INVALID")
-    field(SXSV, "INVALID")
-    field(SVSV, "INVALID")
-    field(EISV, "INVALID")
-    field(NISV, "INVALID")
-    field(TESV, "INVALID")
-    field(ELSV, "INVALID")
-    field(TVSV, "INVALID")
-    field(TTSV, "INVALID")
-    field(FTSV, "INVALID")
-    field(FFSV, "INVALID")
-    # unknown state severity
-    field(UNSV, "INVALID")
-    field(IVOA, "Don't drive outputs")
-    field(FLNK, "$(P)RMT_RB")
-}
 
 
-record(mbbi, "$(P)RMT_RB")
+
+## Fault Status Enable Register
+## By default, enable all (FF)
+## even if FF, the actual value will be returned to FE
+## 
+
+record(stringout, "$(P)FaultEnableRegister_SP") 
 {
-    field(DESC, "Remote Mode Status")
+    field(DESC, "Fault Enable Register SP") 
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getRemoteMode $(PORT)")
-    field(ZRST, "Local")
-    field(ZRVL, "0")
-    field(ONST, "Remote")
-    field(ONVL, "1")
-    field(TWST, "Local Lockout")
-    field(TWVL, "2")
-    field(THSV, "INVALID")
-    field(FRSV, "INVALID")
-    field(FVSV, "INVALID")
-    field(SXSV, "INVALID")
-    field(SVSV, "INVALID")
-    field(EISV, "INVALID")
-    field(NISV, "INVALID")
-    field(TESV, "INVALID")
-    field(ELSV, "INVALID")
-    field(TVSV, "INVALID")
-    field(TTSV, "INVALID")
-    field(FTSV, "INVALID")
-    field(FFSV, "INVALID")
-    # unknown state severity
-    field(UNSV, "INVALID")
+    field( OUT, "@genesysGEN5kWPS.proto setVal(FENA,s,$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)FaultEnableRegister_RB_")
     field(PINI, "YES")
-    field(FLNK, "$(P)RMT_RB_")
+    field( VAL , "FF")
+    
 }
 
 
-
-record(mbbo, "$(P)RMT_RB_")
+record (ai, "$(P)FaultEnableRegister_RB_") 
 {
-    field( DOL, "$(P)RMT_RB NPP")
-    field(OMSL, "closed_loop")
-    field( OUT, "$(P)RMT_SP NPP")
-}
-
-
-record(stringin, "$(P)ACK_MSG_RB")
-{
-    field(DESC, "Acknowlege Message")
-    field(DTYP, "Soft Channel")
-}
-
-record(ao, "$(P)OVP_SP")
-{
+    field(DESC, "Fault Enable Register RB") 
     field(DTYP, "stream")
-    field( OUT, "@genesysGEN5kWPS.proto setVal(OVP,i,$(P)ACK_MSG_RB) $(PORT)")
-    field(HOPR, "$(OVPMAX)")
-    field(LOPR, "$(OVPMIN)")
-    field(FLNK, "$(P)OVP_RB")
+    field( INP, "@genesysGEN5kWPS.proto getVal(FENA?,2X) $(PORT)")
+
 }
 
-record(ai, "$(P)OVP_RB")
+
+record(calc, "$(P)FaultEnableRegister-sts_")
 {
+    field(DESC, "8 Bit Fault Enable Register")
+    field(SCAN, "Passive")
+    field(CALC, "(A&0x00000FF)")
+    field(INPA, "$(P)FaultEnableRegister_RB_ CPP")
+    field(FLNK, "$(P)FaultEnableRegister-BIT-RB")
+}
+
+record(mbbiDirect, "$(P)FaultEnableRegister-BIT-RB")
+{
+    field(DESC, "Fault Enable Register")
+    field(SCAN, "Passive")
+    field( INP, "$(P)FaultEnableRegister-sts_.VAL")
+}
+
+
+record(mbbi, "$(P)FaultEnableRegister-BIT-DESC")
+{
+    field(DESC, "8 Bit Fault Condition Register Desc")
+    field(ZRST, "0")
+    field(ONST, "AC Enable")
+    field(TWST, "OTP Enable")
+    field(THST, "FOLD Enable")
+    field(FRST, "OVP Enable")
+    field(FVST, "SO Enable")
+    field(SXST, "OFF Enable")
+    field(SVST, "ENA Enable")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
+}
+
+
+## Fault Event Register
+record (ai, "$(P)FaultEventRegister_RB_") 
+{
+    field(DESC, "Fault Event Register RB") 
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getVal(OVP?,i) $(PORT)")
-    field( EGU, "V")
-     field(FLNK, "$(P)OVP_RB_")
+    field( INP, "@genesysGEN5kWPS.proto getVal(FEVE?,2X) $(PORT)")
+
 }
 
-record(ao, "$(P)OVP_RB_")
+
+record(calc, "$(P)FaultEventRegister-sts_")
 {
-    field( DOL, "$(P)OVP_RB NPP")
-    field(OMSL, "closed_loop")
-    field( OUT, "$(P)OVP_SP NPP")
+    field(DESC, "8 Bit Fault Enable Register")
+    field(SCAN, "Passive")
+    field(CALC, "(A&0x00000FF)")
+    field(INPA, "$(P)FaultEventRegister_RB_ CPP")
+    field(FLNK, "$(P)FaultEventRegister-BIT-RB")
 }
 
-record(bo, "$(P)OVM_SP")
+record(mbbiDirect, "$(P)FaultEventRegister-BIT-RB")
 {
-    field(DTYP, "stream")
-    field( OUT, "@genesysGEN5kWPS.proto sendCmd(OVM,$(P)ACK_MSG_RB) $(PORT)")
-    field(FLNK, "$(P)OVP_RB")
+    field(DESC, "Fault Enable Register")
+    field(SCAN, "Passive")
+    field( INP, "$(P)FaultEventRegister-sts_.VAL")
+}
+
+
+record(mbbi, "$(P)FaultEventRegister-BIT-DESC")
+{
+    field(DESC, "8 Bit Fault Condition Register Desc")
+    field(ZRST, "0")
+    field(ONST, "AC Event")
+    field(TWST, "OTP Evnet")
+    field(THST, "FOLD Evnet")
+    field(FRST, "OVP Evnet")
+    field(FVST, "SO Evnet")
+    field(SXST, "OFF Evnet")
+    field(SVST, "ENA Evnet")
+    field(EISV, "INVALID")
+    field(NISV, "INVALID")
+    field(TESV, "INVALID")
+    field(ELSV, "INVALID")
+    field(TVSV, "INVALID")
+    field(TTSV, "INVALID")
+    field(FTSV, "INVALID")
+    field(FFSV, "INVALID")
+    # unknown state severity
+    field(UNSV, "INVALID")
 }
 
 

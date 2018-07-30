@@ -81,3 +81,39 @@ GEM5kWPS-RFLab:GEN5kWPS:FR-BIT-DESC Spare
 GEM5kWPS-RFLab:GEN5kWPS:RMT_RB Remote
 
 ```
+
+## Status, Error and SRQ Resisters
+
+The IOC supports all features through RS232 commands, but the IOC cannot accept the SEQ event through Serial TXD line. Even so, the event registers can be read manually by using enable all status and fault registers if one would like to use them. 
+
+However, it is better to use the direct access to the status and fault registers via the existent commands (FLT? and STAT?). Thus, the IOC can access the Status and Fault Registers with SCAN period (now 1 second) freely. The bit can be accessed via
+```
+$(P)StatusRegister-BIT-RB 
+$(P)FaultRegister-BIT-RB
+```
+The description of each bits are
+```
+$(P)StatusRegister-BIT-DESC
+$(P)FaultRegister-BIT-DESC
+```
+
+For example,
+
+```
+$for i in `seq 0 7`; do caget GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B$i; done
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B0 0
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B1 0
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B2 1
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B3 0
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B4 1
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B5 0
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B6 0
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-RB.B7 0
+
+$caget GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-DESC.ZRST
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-DESC.ZRST CV:Constant Voltage
+
+$ caget GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-DESC.FVST
+GEM5kWPS-RFLab:GEN5kWPS:StatusRegister-BIT-DESC.FVST FDE:Fold Enabled
+```
+

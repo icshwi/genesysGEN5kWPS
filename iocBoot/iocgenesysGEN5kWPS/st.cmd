@@ -36,7 +36,7 @@ asynOctetSetInputEos($(PORT), 0, "\r")
 asynOctetSetOutputEos($(PORT), 0, "\r")
 
 dbLoadRecords("db/iocAdminSoft.db",  "IOC=${IOCST}")
-dbLoadRecords("db/genesysGEN5kWPS.db", "P=$(P)-$(R):GEN5kWPS:,PORT=$(PORT),OVPMIN=$(OVPMIN),OVPMAX=$(OVPMAX),VMIN=$(VMIN),VMAX=$(VMAX),CMIN=$(CMIN),CMAX=$(CMAX)")
+dbLoadRecords("db/genesysGEN5kWPS.db", "P=$(P)-$(R):GEN5kWPS:,PORT=$(PORT),OVPMIN=$(OVPMIN),OVPMAX=$(OVPMAX),UVLMIN=$(UVLMIN),UVLMAX=$(UVLMAX),VMIN=$(VMIN),VMAX=$(VMAX),CMIN=$(CMIN),CMAX=$(CMAX)")
 dbLoadRecords("db/stream_raw.db", "P=$(P)-$(R):,PORT=$(PORT)")
 
 cd "${TOP}/iocBoot/${IOC}"

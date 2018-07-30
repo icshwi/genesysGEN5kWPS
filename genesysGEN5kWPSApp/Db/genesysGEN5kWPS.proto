@@ -5,8 +5,8 @@
 #
 #  Author  : Jeong Han Lee
 #  email   : jeonghan.lee@gmail.com
-#  Date    : Tuesday, July 24 13:50:38 CEST 2018
-#  version : 0.0.1
+#  Date    : Monday, July 30 17:15:11 CEST 2018
+#  version : 0.0.2
 #
 
 LockTimeout = 5000;
@@ -49,6 +49,59 @@ getModel {
 
 
 
+setEnableAll {
+    out "\$1 %\$2";
+    in "%(\$2.VAL)39c";
+    ExtraInput = Ignore;
+}
+
+
+# PV, PC, OVP, UVL are the setpoints
+# they will be readed when the value are changed
+# not necessary to access all in every SCAN period
+
+getDVCMV {
+    out "DVC?";
+    in "%f,%*f,%*f,%*f,%*f,%*f"
+}
+
+getDVCPV {
+    in "%*f,%f,%*f,%*f,%*f,%*f"
+}
+
+getDVCMC {
+    in "%*f,%*f,%f,%*f,%*f,%*f"
+}
+
+getDVCPC {
+    in "%*f,%*f,%*f,%f,%*f,%*f"
+}
+
+getDVCOVP {
+    in "%*f,%*f,%*f,%*f,%f,%*f"
+}
+
+getDVCUVL {
+    in "%*f,%*f,%*f,%*f,%*f,%f"
+}
+
+
+
+getRemoteMode {
+    out "RMT?";
+    in "%{LOC|REM|LLO}";
+}
+
+setRemoteMode {
+    out "RMT %{LOC|REM|LLO}";
+    in "%(\$1.VAL)39c";
+    ExtraInput = Ignore;
+}
+
+
+
+## not used
+
 getSTTMV {
     out "STT?";
     in "MV(%f),PV(%*f),MC(%*f),PC(%*f),SR(%*2X),FR(%*2X)"
@@ -76,29 +129,4 @@ getSTTSR {
 
 getSTTFR {
     in "MV(%*f),PV(%*f),MC(%*f),PC(%*f),SR(%*2X),FR(%2X)"
-}
-
-
-getRemoteMode {
-    out "RMT?";
-    in "%{LOC|REM|LLO}";
-}
-
-setRemoteMode {
-    out "RMT %{LOC|REM|LLO}";
-    in "%(\$1.VAL)39c";
-    ExtraInput = Ignore;
-}
-
-#----------------------------------------------------------------------
-# on/off
-#
-setAST {
-    out "AST %{1|0}";
-    in "%(\$1.VAL)39c";
-    ExtraInput = Ignore;
-}
-
-getAST {
-    out "AST?";
 }
