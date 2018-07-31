@@ -139,7 +139,7 @@ record(mbbi, "$(P)RMT_RB")
 {
     field(DESC, "Remote Mode Status")
     field(DTYP, "stream")
-    field( INP, "@genesysGEN5kWPS.proto getRemoteMode $(PORT)")
+    field( INP, "@genesysGEN5kWPS.proto getRemoteMode($(P)ACK_MSG_RB) $(PORT)")
     field(ZRST, "Local")
     field(ZRVL, "0")
     field(ONST, "Remote")
@@ -618,8 +618,8 @@ record(mbbi, "$(P)StatusRegister-BIT-DESC")
 
 
 ## Status Enable Register
-## By default, enable all (FF)
-## even if FF, the actual value will be returned to 8F
+## By default, disable all (00)
+## Note that the enable all(FF) has the actual value 8F
 ## 
 record(stringout, "$(P)StatusEnableRegister_SP") 
 {
@@ -628,7 +628,7 @@ record(stringout, "$(P)StatusEnableRegister_SP")
     field( OUT, "@genesysGEN5kWPS.proto setVal(SENA,s,$(P)ACK_MSG_RB) $(PORT)")
     field(FLNK, "$(P)StatusEnableRegister_RB_")
     field(PINI, "YES")
-    field( VAL , "FF")
+    field( VAL , "00")
     
 }
     

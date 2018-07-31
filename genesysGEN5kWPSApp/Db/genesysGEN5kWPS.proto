@@ -90,6 +90,9 @@ getDVCUVL {
 getRemoteMode {
     out "RMT?";
     in "%{LOC|REM|LLO}";
+    @mismatch {
+        in "%(\$1.VAL)39c";
+    }
 }
 
 setRemoteMode {
