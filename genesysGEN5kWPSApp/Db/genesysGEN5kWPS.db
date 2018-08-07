@@ -628,7 +628,7 @@ record(stringout, "$(P)StatusEnableRegister_SP")
     field( OUT, "@genesysGEN5kWPS.proto setVal(SENA,s,$(P)ACK_MSG_RB) $(PORT)")
     field(FLNK, "$(P)StatusEnableRegister_RB_")
     field(PINI, "YES")
-    field( VAL , "00")
+    field( VAL, "00")
     
 }
     
@@ -800,7 +800,7 @@ record(stringout, "$(P)FaultEnableRegister_SP")
     field( OUT, "@genesysGEN5kWPS.proto setVal(FENA,s,$(P)ACK_MSG_RB) $(PORT)")
     field(FLNK, "$(P)FaultEnableRegister_RB_")
     field(PINI, "YES")
-    field( VAL , "FF")
+    field( VAL, "FF")
     
 }
 
