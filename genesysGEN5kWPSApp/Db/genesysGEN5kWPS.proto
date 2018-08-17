@@ -17,6 +17,13 @@ PollPeriod = $ReplyTimeout;
 
 
 
+setAddr {
+    out "ADR \$1";
+    in "%(\$2.VAL)39c";
+    ExtraInput = Ignore;
+}
+
+
 sendCmd {
     out "\$1";
     in "%(\$2.VAL)39c";

@@ -1,4 +1,15 @@
 
+## ADR n : ADR is followed by address which can be 0 to 30 and is used to access the power supply
+record(bo, "$(P)ADR_SP")
+{
+    field(DESC, "Address Set")
+    field(DTYP, "stream")
+    field(ZNAM, "Set")
+    field(ONAM, "set")
+    field( OUT, "@genesysGEN5kWPS.proto setAddr($(ADDR=6),$(P)ACK_MSG_RB) $(PORT)")
+    field(FLNK, "$(P)InfoUpdate-Cmd")
+}
+
 
 record(stringin, "$(P)ACK_MSG_RB")
 {
@@ -17,17 +28,18 @@ record(bo, "$(P)InfoUpdate-Cmd")
     field(FLNK, "$(P)InfoUpdate:1-Fout_")
     field(HIGH, "2")
     field( VAL, "1")
-    field(PINI, "YES")
+#    field(PINI, "YES")
 }
 
 record(fanout, "$(P)InfoUpdate:1-Fout_")
 {
-    field(LNK1, "$(P)MODEL_RB")
-    field(LNK2, "$(P)SN_RB")
-    field(LNK3, "$(P)SWVersion_RB")
-    field(LNK4, "$(P)Date_RB")
-    field(LNK5, "$(P)MultiDropSupport_RB")
-    field(LNK6, "$(P)InfoUpdate:2-Fout_")
+    field(LNK1, "$(P)ADR_SP")
+    field(LNK2, "$(P)MODEL_RB")
+    field(LNK3, "$(P)SN_RB")
+    field(LNK4, "$(P)SWVersion_RB")
+    field(LNK5, "$(P)Date_RB")
+    field(LNK6, "$(P)MultiDropSupport_RB")
+    field(LNK7, "$(P)InfoUpdate:2-Fout_")
 }
 
 
@@ -75,6 +87,8 @@ record(fanout, "$(P)UpdateEvents")
 }
 
 ## 7.7.3 Initialization control commands
+
+
 
 ## CLS : Clear Event Status
 ## Set FEVE and SEVE registers to zero
@@ -161,7 +175,7 @@ record(mbbi, "$(P)RMT_RB")
     field(FFSV, "INVALID")
     # unknown state severity
     field(UNSV, "INVALID")
-    field(PINI, "YES")
+#    field(PINI, "YES")
     field(FLNK, "$(P)RMT_RB_")
 }
 
@@ -195,7 +209,7 @@ record(stringin, "$(P)MODEL_RB")
     field(DESC, "Model Name")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getModel $(PORT)")
-    field(PINI, "YES")
+#    field(PINI, "YES")
 }
 
 # SN?
@@ -245,7 +259,7 @@ record(ai, "$(P)Voltage_RB")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(PV?,f) $(PORT)")
     field( EGU, "V")
-    field(PINI, "YES")
+#    field(PINI, "YES")
     field(FLNK, "$(P)Voltage_RB_")
 }
 
@@ -275,7 +289,7 @@ record(ai, "$(P)Current_RB")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(PC?,f) $(PORT)")
     field( EGU, "A")
-    field(PINI, "YES")
+#    field(PINI, "YES")
     field(FLNK, "$(P)Current_RB_")
 }
 
@@ -558,7 +572,7 @@ record(stringin, "$(P)MasterSlaveSetting_RB")
     field(DESC, "Master Slave Setting")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getVal(MS?,39c) $(PORT)")
-    field(PINI, "YES")
+#    field(PINI, "YES")
 }
 
 
@@ -627,7 +641,7 @@ record(stringout, "$(P)StatusEnableRegister_SP")
     field(DTYP, "stream")
     field( OUT, "@genesysGEN5kWPS.proto setVal(SENA,s,$(P)ACK_MSG_RB) $(PORT)")
     field(FLNK, "$(P)StatusEnableRegister_RB_")
-    field(PINI, "YES")
+#    field(PINI, "YES")
     field( VAL, "00")
     
 }
@@ -799,7 +813,7 @@ record(stringout, "$(P)FaultEnableRegister_SP")
     field(DTYP, "stream")
     field( OUT, "@genesysGEN5kWPS.proto setVal(FENA,s,$(P)ACK_MSG_RB) $(PORT)")
     field(FLNK, "$(P)FaultEnableRegister_RB_")
-    field(PINI, "YES")
+#    field(PINI, "YES")
     field( VAL, "FF")
     
 }
