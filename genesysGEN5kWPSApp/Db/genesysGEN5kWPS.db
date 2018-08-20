@@ -8,6 +8,7 @@ record(bo, "$(P)ADR_SP")
     field(ONAM, "set")
     field( OUT, "@genesysGEN5kWPS.proto setAddr($(ADDR=6),$(P)ACK_MSG_RB) $(PORT)")
     field(FLNK, "$(P)InfoUpdate-Cmd")
+    field(PINI, "YES")
 }
 
 
@@ -26,9 +27,7 @@ record(bo, "$(P)InfoUpdate-Cmd")
     field(ZNAM, "Revert")
     field(ONAM, "revert")
     field(FLNK, "$(P)InfoUpdate:1-Fout_")
-    field(HIGH, "2")
     field( VAL, "1")
-#    field(PINI, "YES")
 }
 
 record(fanout, "$(P)InfoUpdate:1-Fout_")
@@ -100,14 +99,18 @@ record(bo, "$(P)ClearEvent")
 }
 
 ## RST : Reset command. Brings the power supply to a safe and known state
-## Output voltage, current (SCAN 1 second)
-## Remote    (LNK7)
+## $(P)InfoUpdate:2-Fout_ (FLNK) 
 ## Auto-start(LNK1)
-## Output    (LNK4)
 ## FOLD      (LNK2/3)
+## Output    (LNK4)
 ## OVP       (LNK5)
 ## UVL       (LNK6)
-## FLT and STAT will be updated
+## Remote    (LNK7)
+## $(P)ScanUpdate:-Fout_  (SCAN : 1 Second)
+## Output Voltage (LNK1)
+## Output Current (LNK1, I/O Intr)
+## STAT           (LNK3)
+## FLT            (LNK4)
 record(bo, "$(P)Reset")
 {
     field(DESC, "Reset the Power Supply")
@@ -209,7 +212,6 @@ record(stringin, "$(P)MODEL_RB")
     field(DESC, "Model Name")
     field(DTYP, "stream")
     field( INP, "@genesysGEN5kWPS.proto getModel $(PORT)")
-#    field(PINI, "YES")
 }
 
 # SN?
